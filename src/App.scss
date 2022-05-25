@@ -10,7 +10,7 @@
   padding: 2px;
   display: grid;
   grid-template: repeat(10, max(11px)) / repeat(10, max(11px));
-  width: 1100px; // нужно сделать рассчет фона исходя из кол-ва квадратов
+  width: 1100px;
   height: 638px;
   background: rgb(240, 240, 240);
 }

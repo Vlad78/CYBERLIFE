@@ -4,8 +4,6 @@ import { Routes } from "react-router-dom";
 import App from "./App";
 import "./main.scss";
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+console.log("main");
+
+ReactDOM.createRoot(document.getElementById("root")!).render(<App />);

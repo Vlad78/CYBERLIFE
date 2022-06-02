@@ -1,9 +1,8 @@
 import GridCell from "../components/GridCell";
-import Organism from "../components/Organism";
 import Color from "../properties/Color";
 
 const initValues = (pair: [number, number], colonies = 4) => {
-  console.log("initializing"); // инициализация матрицы
+  console.log("initializing of matrix"); // инициализация матрицы
 
   let initialValue: GridCell[][] = [];
   let column: GridCell[] = [];
@@ -19,6 +18,7 @@ const initValues = (pair: [number, number], colonies = 4) => {
         isEmpty: true,
         isDead: false,
         color: Color.EMPTY,
+        organismId: -1,
       });
     }
     initialValue.push(column);

@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { PGProps } from "../App";
 import { RootState } from "../app/store";
 import GridCell from "../components/GridCell";
 
@@ -7,12 +6,27 @@ import initValues from "../functions/initialValueForPlayground";
 import Color from "../properties/Color";
 
 interface PlaygroundState {
-  value: GridCell[][];
+  value: {
+    speed: number;
+    colonies: number;
+    radiation: number;
+    minerals: number;
+    matrixSize: [number, number];
+    initialPlayground: GridCell[][];
+    firstRun: boolean;
+  };
 }
-console.log("slice");
 
 const initialState: PlaygroundState = {
-  value: PGProps.initialPlayground,
+  value: {
+    speed: 2000, // Скорость обновления площадки. Начальное - 2 сек/день
+    colonies: 4, // Количество колоний в начале. По-умолчанию 4
+    radiation: 10, // Энергия солнца
+    minerals: 10, // Количество минералов
+    matrixSize: [105, 60], // размер матрицы
+    initialPlayground: initValues([105, 60]),
+    firstRun: true,
+  },
 };
 
 export const playgroundSlice = createSlice({
@@ -23,14 +37,17 @@ export const playgroundSlice = createSlice({
       state,
       action: PayloadAction<{ x: number; y: number; color: Color }>
     ) => {
-      state.value[action.payload.x][action.payload.y] = {
-        ...state.value[action.payload.x][action.payload.y],
+      state.value.initialPlayground[action.payload.x][action.payload.y] = {
+        ...state.value.initialPlayground[action.payload.x][action.payload.y],
         color: action.payload.color,
       };
+    },
+    firstRun: (state) => {
+      state.value.firstRun = false;
     },
   },
 });
 
-export const { setOneCell } = playgroundSlice.actions;
+export const { setOneCell, firstRun } = playgroundSlice.actions;
 export const selectCount = (state: RootState) => state.playground.value;
 export default playgroundSlice.reducer;

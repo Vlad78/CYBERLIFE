@@ -3,7 +3,13 @@ enum Color {
   PHOTOSYNTHESIS = "#379168",
   PREDATOR = "#B01239",
   MINERAL = "#133C55",
-  DEAD = "#FECB34",
+  DEAD = "#f2d963",
+  PHOTO_PREDATOR = "#745251",
+  PHOTO_MINERAL = "#25675f", // #9966CC
+  PREDATOR_MINERAL = "#622747",
+  PHOTO_MINERAL_PREDATOR = "#534A52",
 }
+
+// #4D368B
 
 export default Color;

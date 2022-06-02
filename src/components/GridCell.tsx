@@ -6,7 +6,7 @@ interface GridCell {
   x: number;
   y: number;
   isEmpty: boolean;
-  organismId?: number;
+  organismId: number;
   isDead: boolean;
   color: Color;
 }

@@ -6,6 +6,5 @@ export const store = configureStore({
     playground: PlaygroundReducer,
   },
 });
-console.log("store");
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

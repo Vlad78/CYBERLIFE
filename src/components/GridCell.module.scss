@@ -1,6 +1,21 @@
-.background_null {
+.background_default {
   width: 8px;
   height: 8px;
+  line-height: 8px;
   margin: 2px;
   display: grid;
+  font-size: 7px;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+
+  &:hover {
+    width: 12px;
+    height: 12px;
+    line-height: 12px;
+    font-size: 8.5px;
+    margin: 0px;
+    transition: 0.15s;
+    font-weight: 700;
+  }
 }

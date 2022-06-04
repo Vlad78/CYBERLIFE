@@ -1,14 +1,14 @@
 import GridCell from "../components/GridCell";
 import Organism, { Direction } from "../components/Organism";
 import Color from "../properties/Color";
-import initialProperties from "./initialProperties";
+import initialProperties, { getInitProps } from "./initialProperties";
 
 let playgroundMatrix: GridCell[][];
 let matrixSize: [number, number];
 let lightEnergy = initialProperties.radiation;
 let mineralsEnergy = initialProperties.minerals;
 
-export function setPlaygroundMatrix(a: GridCell[][], b: [number, number]) {
+export function initiatePlaygroundMatrix(a: GridCell[][], b: [number, number]) {
   playgroundMatrix = a;
   matrixSize = b;
 }
@@ -27,41 +27,102 @@ export function setMatrixCell(a: GridCell) {
     organismId: a.organismId,
     isDead: a.isDead,
     color: a.color,
+    energy: a.energy,
+  };
+}
+
+export function reserveMatrixCell(x: number, y: number, id: number) {
+  playgroundMatrix[x][y] = {
+    ...playgroundMatrix[x][y],
+    x: x,
+    y: y,
+    isEmpty: false,
+    organismId: id,
   };
 }
 
 export function cellIsTaken([x, y]: [number, number]): 0 | 2 | 4 | 5 | 6 {
-  if (playgroundMatrix[x][y].isEmpty) {
+  const a = playgroundMatrix[x][y];
+
+  //   console.log("playgroundMatrix[x][y].isEmpty = " + a + ` x=${x} y=${y}`);
+
+  if (a.isEmpty) {
     return 2;
   } else {
-    if (playgroundMatrix[x][y].isDead) return 4;
-    if (
-      playgroundMatrix[x][y].organismId != undefined &&
-      playgroundMatrix[x][y].organismId > 0
-    )
-      return 5;
+    if (a.isDead) return 4;
+    if (a.organismId != undefined && a.organismId > -1) return 5;
     if (false) return 6; //  определяем родственные связи с соседней клеткой
   }
-  return 0;
+
+  throw new Error(
+    `playgroundMatrix[x][y].isEmpty =${a.isEmpty} x=${x} y=${y} playgroundMatrix[x][y].isDead =${a.isDead} playgroundMatrix[x][y].organismId =${a.organismId}`
+  );
 }
 
 export function getFreeCell([x, y]: [number, number], direction: Direction) {
   let freeCellCoord: [number, number] | null = null;
+
   for (let i = 1; i < 8; i++) {
     let nextDirection = direction + i;
-    if (nextDirection >= 8) nextDirection - 8;
-    const coord = Organism.getCoordsOfDirection(
-      x,
-      y,
-      nextDirection as Direction
-    );
-    const b = cellIsTaken(coord);
-    if (b === 2) {
+    if (nextDirection >= 8) nextDirection = nextDirection - 8;
+    const coord = getCoordsOfDirection(x, y, nextDirection as Direction);
+    if (2 === cellIsTaken(coord)) {
       freeCellCoord = coord;
       break;
     }
   }
+
   return freeCellCoord;
+}
+
+export function getCoordsOfDirection(
+  x: number,
+  y: number,
+  direction: Direction
+): [number, number] {
+  let newCoords: [number, number] | null = null;
+  // prettier-ignore
+  switch(direction) {
+        case 0: newCoords = [x, y-1]; break
+        case 1: newCoords = [x+1, y-1]; break
+        case 2: newCoords = [x+1, y]; break
+        case 3: newCoords = [x+1, y+1]; break
+        case 4: newCoords = [x, y+1]; break
+        case 5: newCoords = [x-1, y+1]; break
+        case 6: newCoords = [x-1, y]; break
+        case 7: newCoords = [x-1, y-1]; break
+      } // prettier-ignore-end
+
+  if (
+    newCoords === null ||
+    newCoords[0] > matrixSize[0] ||
+    newCoords[1] > matrixSize[1] ||
+    newCoords[0] === null ||
+    newCoords[1] === null
+  )
+    throw new Error(
+      `ошибка координат. newCoords=${newCoords} newCoords[0]=${newCoords[0]} newCoords[1]=${newCoords[1]}`
+    );
+
+  // проверяем выход организма за пределы матрицы. Поле сквозное
+
+  if (newCoords[0] < 0) {
+    newCoords[0] = getInitProps().matrixSize[0] + newCoords[0];
+  }
+
+  if (newCoords[1] < 0) {
+    newCoords[1] = getInitProps().matrixSize[1] + newCoords[1];
+  }
+
+  if (newCoords[0] == getInitProps().matrixSize[0]) {
+    newCoords[0] = 0;
+  }
+
+  if (newCoords[1] == getInitProps().matrixSize[1]) {
+    newCoords[1] = 0;
+  }
+
+  return newCoords;
 }
 
 export function clearCell([x, y]: [number, number]) {

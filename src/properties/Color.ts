@@ -1,6 +1,6 @@
 enum Color {
   EMPTY = "#FFFCF9",
-  PHOTOSYNTHESIS = "#379168",
+  PHOTOSYNTHESIS = "#85d38f",
   PREDATOR = "#B01239",
   MINERAL = "#133C55",
   DEAD = "#f2d963",

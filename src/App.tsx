@@ -7,7 +7,6 @@ import initValues from "./functions/initialValueForPlayground";
 console.log("app");
 
 function App() {
-  console.log("app F");
   return (
     <Provider store={store}>
       <div className="header">CYBER EVOLUTION</div>

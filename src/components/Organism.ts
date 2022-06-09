@@ -1,8 +1,4 @@
-import {
-  add1Organism,
-  deleteOrganism,
-  getOrganismsArray,
-} from "../state/organismsArray";
+import { add1Organism, deleteOrganism, getOrganismsArray } from "../state/organismsArray";
 import Color from "../properties/Color";
 import newId from "./Id";
 import GridCell from "./GridCell";
@@ -59,14 +55,10 @@ class Organism {
   direction = 0 as Direction;
   color = Color.PHOTOSYNTHESIS;
   numberofTurns = 0;
+  immune = true;
+  whoWasEaten: number | null = null;
 
-  constructor(
-    x: number,
-    y: number,
-    genome: Genome,
-    energy?: number,
-    idParent?: number
-  ) {
+  constructor(x: number, y: number, genome: Genome, energy?: number, idParent?: number) {
     this.x = x;
     this.y = y;
     this.genome = genome;
@@ -79,7 +71,9 @@ class Organism {
   }
 
   getNextGene() {
-    return this.genome[this.gCounter + 1];
+    if (this.gCounter + 1 === 64) {
+      return this.genome[0];
+    } else return this.genome[this.gCounter + 1];
   }
 
   move(x: number, y: number, direction: Direction) {
@@ -88,13 +82,14 @@ class Organism {
     // проверяем свободна ли клетка, куда хочет переместиться организм или что там находится
     const a = cellIsTaken(newCoords);
     if (a > 2) {
-      // Если органика - 4, организм - 5, родня - 6, пусто - 2.
+      // Если органика - 4, организм - 5, родня - 6, спора - 7, пусто - 2.
       // gCounter увеличивается на значение, которое записано в этом гене.
       // определить концепцию "родня". Несовпадение кол-ва ген? Ген коллективизация/одиночка.
       // Наследственная передача родственной связи.
       return a;
     } else {
       clearCell([x, y]);
+      reserveMatrixCell(newCoords[0], newCoords[1], this.id, this.immune);
       this.x = newCoords[0];
       this.y = newCoords[1];
       return a;
@@ -109,90 +104,126 @@ class Organism {
   fission(x: number, y: number, direction: Direction): 0 | 1 | 2 {
     const newXY = getCoordsOfDirection(x, y, direction);
 
-    // console.log(this.energy);
+    if (![0, 1, 2, 3, 4, 5, 6, 7].includes(direction)) {
+      console.log(
+        "FISSION direction =" +
+          direction +
+          " id =" +
+          this.id +
+          " genome = " +
+          this.genome +
+          " x = " +
+          x +
+          " y = " +
+          y
+      );
+    }
 
     if (cellIsTaken(newXY) > 2) {
       // клетка была занята
 
       const freeXY = getFreeCell([x, y], direction);
       if (freeXY != null) {
-        // console.log(
-        //   this.id +
-        //     " рождает в свободную клетку " +
-        //     `x=${freeXY[0]} y=${freeXY[1]} direction=${direction}`
-        // );
-        new Organism(
-          freeXY[0],
-          freeXY[1],
-          Organism.genomeMutation(this.genome)
-        );
-        // нужно нарисовать организм в матрице
-        reserveMatrixCell(freeXY[0], freeXY[1], this.id);
+        const id = new Organism(freeXY[0], freeXY[1], Organism.genomeMutation(this.genome)).id;
+
+        reserveMatrixCell(freeXY[0], freeXY[1], id, true);
+        // организм лежит в новом массиве организмов и во взаимодействии не участвует. Съесть и удалить его невозможно.
+        // соответственно зарезервированный организм в матрице должен восприниматься как неуязвимый
+        // можно ввести условие, что молодые организмы есть нельзя. Тогда в объекте организма в матрице появится новое поле -
+        // возвраст, которое нужно будет перезаписывать каждый цикл
         return 1;
       } else {
         return 0;
       }
+      // баг в том, что можно съесть организм с матрицы, но это не удаляет организм из массива
     } else {
-      // console.log(
-      //   this.id +
-      //     " рождает в клетку по направлению " +
-      //     `x=${newXY[0]} y=${newXY[1]} direction=${direction}`
-      // );
-      new Organism(newXY[0], newXY[1], Organism.genomeMutation(this.genome));
-      // нужно нарисовать организм в матрице
-      reserveMatrixCell(newXY[0], newXY[1], this.id);
+      // клетка свободна
+      // рождает в клетку по направлению
+
+      const id = new Organism(newXY[0], newXY[1], Organism.genomeMutation(this.genome)).id;
+      reserveMatrixCell(newXY[0], newXY[1], id, true);
       return 1;
     }
   }
 
-  eat(direction: Direction) {
-    // 1. получить информацию из клетки по направлению
+  eat(direction: Direction): [number, number | null] {
+    // if (direction > 7 || direction < 0)
+    //   console.log(
+    //     "direction =" +
+    //       direction +
+    //       " id =" +
+    //       this.id +
+    //       " genome = " +
+    //       this.genome
+    //   );
+
     let newCoords = getCoordsOfDirection(this.x, this.y, direction);
     const cellStatus = cellIsTaken(newCoords);
-    if (cellStatus > 2) {
-      if (cellStatus === 4) {
-        clearCell(newCoords); // удаляем из матрицы
-        return 30;
-      }
-      if (cellStatus === 5) {
-        const id = clearCell(newCoords);
-        deleteOrganism(id);
-        return 45;
-      }
-      if (cellStatus === 6) {
-        return 0;
-      } // пока что родственников не едим
-    } else {
-      return 0;
+    // console.log(cellStatus + " " + this.id);
+
+    switch (cellStatus) {
+      case 4: // органика
+        // console.log(cellStatus + " " + this.id + " case 4");
+        try {
+          clearCell(newCoords);
+          return [30, null];
+        } catch (e) {
+          throw new Error(`Ошибка поедания организмом ${this.id}` + e);
+        }
+
+      case 5: // живой организм
+        // console.log(cellStatus + " id = " + this.id + " case 5");
+        try {
+          const id = clearCell(newCoords);
+          deleteOrganism(id);
+          return [45, id];
+        } catch (e) {
+          throw new Error(`Ошибка поедания организмом ${this.id}` + e);
+        }
+
+      case 6: // родня
+        return [0, null]; // родственников не едим
+
+      default:
+        // console.log(cellStatus + " " + this.id + " case default");
+        return [0, null];
     }
-    return 0;
   }
 
-  exec() {
+  exec(): [GridCell, number | null] {
     this.numberofTurns++;
+    if (this.immune === true) this.immune = false;
+    if (this.whoWasEaten !== null) this.whoWasEaten === null;
     // console.log(
-    //   "genome code = " +
-    //     this.genome[this.gCounter] +
-    //     " id = " +
-    //     this.id +
-    //     " counter = " +
-    //     this.gCounter +
-    //     " E = " +
-    //     this.energy +
-    //     " direction = " +
-    //     this.direction
+    // "genome code = " +
+    //   this.genome[this.gCounter] +
+    // " id = " + this.id
+    // " counter = " +
+    // this.gCounter +
+    // " E = " +
+    // this.energy +
+    // " direction = " +
+    // this.direction
     // );
     let endofTurn = false;
     for (let i = 0; i < initialProperties.numberOfCommand && !endofTurn; i++) {
       endofTurn = this.runGenome();
-      // console.log("endofTurn = " + endofTurn + i);
     }
+
+    if (this.gCounter > 63) this.gCounter = this.gCounter - 64;
 
     this.minerals += getMineralsEnergy(this.y);
 
+    // блок исправления ошибок
+    if (![0, 1, 2, 3, 4, 5, 6, 7].includes(this.direction)) {
+      console.log(`исправлена ошибка направления direction=${this.direction} у ${this.toText()}`);
+
+      this.direction = 0;
+    }
+
     // 👶
     // деление возможно только при определенном кол-ве энергии. Кол-во детей зависит от кол-ва энергии
-    if (this.energy > 100) {
+    if (this.energy > 110) {
       const result = this.fission(this.x, this.y, this.direction);
 
       if (result === 0) {
@@ -207,23 +238,39 @@ class Organism {
       }
     }
 
-    return {
-      x: this.x,
-      y: this.y,
-      isEmpty: false,
-      organismId: this.id,
-      isDead: this.isDead,
-      color: this.color,
-      energy: this.energy,
-    } as GridCell;
+    if (this.numberofTurns > 80) {
+      this.isDead = true;
+      this.color = Color.DEAD;
+      this.id = -1;
+      this.energy = 0;
+    }
+
+    if (this.energy > 400) {
+      this.isDead = true;
+      this.color = Color.DEAD;
+      this.id = -1;
+      this.energy = 0;
+    }
+
+    return [
+      {
+        x: this.x,
+        y: this.y,
+        isEmpty: false,
+        organismId: this.id,
+        isDead: this.isDead,
+        color: this.color,
+        energy: this.energy,
+        immune: this.immune,
+      },
+      this.whoWasEaten,
+    ];
   }
 
   runGenome() {
     if (this.gCounter > 63) this.gCounter = this.gCounter - 64;
 
     if (this.energy < 1) {
-      // организм умирает
-      // console.log("организм умирает");
       this.isDead = true;
       this.color = Color.DEAD;
       this.id = -1;
@@ -234,16 +281,15 @@ class Organism {
     switch (this.genome[this.gCounter]) {
       case 23: // 🧭
         this.direction = (this.getNextGene() % 8) as Direction; // defines move direction
+        // ошибка возникает, когда эта функция вызывается в конце массива ( в 63 гене)
         this.gCounter = this.gCounter + 2;
         this.energy--;
         // console.log("🧭");
         break;
 
       case 24: // 🧭
-        this.direction = (this.direction +
-          (this.getNextGene() % 8)) as Direction; // defines move direction
-        if (this.direction > 7)
-          this.direction = (this.direction - 8) as Direction;
+        this.direction = (this.direction + (this.getNextGene() % 8)) as Direction; // defines move direction
+        if (this.direction > 7) this.direction = (this.direction - 8) as Direction;
         this.gCounter = this.gCounter + 2;
         this.energy--;
         break;
@@ -256,43 +302,70 @@ class Organism {
         return true;
 
       case 26: //  🏃‍♀️
-        this.direction = (this.getNextGene() % 8) as Direction;
-        const counterShift0 = this.move(this.x, this.y, this.direction);
-        this.gCounter += this.genome[this.gCounter + counterShift0]; // увеличиваем на значение гена на значение через counterShift
-        this.energy--;
+        try {
+          this.direction = (this.getNextGene() % 8) as Direction;
+          const counterShift = this.move(this.x, this.y, this.direction);
+          this.gCounter += this.genome[this.gCounter + counterShift];
+          // увеличиваем на значение гена на значение через counterShift
+        } catch (e) {
+          console.log(`case 26 direction =${this.direction} e = ${e}`);
+        }
+        this.energy = this.energy - 2;
         return true;
 
-      // case 27: //  🏃‍♀️
-      //   const counterShift1 = this.move(this.x, this.y, this.direction);
-      //   this.gCounter += this.genome[this.gCounter + counterShift1]; // увеличиваем на значение гена на значение через counterShift
-      //   this.energy--;
-      //   return true;
+      case 27: //  🏃‍♀️
+        try {
+          const counterShift = this.move(this.x, this.y, this.direction);
+          this.gCounter += this.genome[this.gCounter + counterShift]; // увеличиваем на значение гена на значение через counterShift
+        } catch (e) {
+          console.log(`case 27 direction =${this.direction} e = ${e}`);
+        }
+        this.energy = this.energy - 2;
+        return true;
 
-      // case 28: // 🍴
-      //   this.direction = (this.getNextGene() % 8) as Direction;
-      //   const energy = this.eat(this.direction);
-      //   this.energy += energy;
-      //   this.gCounter++;
-      //   return true;
+      case 28: // 🍴
+        this.direction = (this.getNextGene() % 8) as Direction;
+        try {
+          const [energy, whoWasEaten] = this.eat(this.direction);
+          this.energy += energy;
+          this.whoWasEaten = whoWasEaten;
+        } catch (e) {
+          console.log(`case 28 direction =${this.direction} e = ${e}`);
+        }
+        this.gCounter++;
+        return true;
 
-      // case 29: // 🍴
-      //   const energy1 = this.eat(this.direction);
-      //   this.energy += energy1;
-      //   this.gCounter++;
-      //   return true;
+      case 29: // 🍴
+        try {
+          const [e, id] = this.eat(this.direction);
+          this.energy += e;
+          this.whoWasEaten = id;
+        } catch (e) {
+          console.log(`case 29 direction =${this.direction} e = ${e}`);
+        }
+        this.gCounter++;
+        return true;
 
-      // case 30: // 👀
-      //   this.direction = (this.getNextGene() % 8) as Direction;
-      //   const counterShift2 = this.look(this.x, this.y, this.direction);
-      //   this.gCounter += this.genome[this.gCounter + counterShift2]; // увеличиваем на значение гена на значение через counterShift
-      //   this.energy--;
-      //   break;
+      case 30: // 👀
+        this.direction = (this.getNextGene() % 8) as Direction;
+        try {
+          const counterShift = this.look(this.x, this.y, this.direction);
+          this.gCounter += this.genome[this.gCounter + counterShift]; // увеличиваем на значение гена на значение через counterShift
+        } catch (e) {
+          console.log(`case 30 direction =${this.direction} e = ${e}`);
+        }
+        this.energy--;
+        break;
 
-      // case 31: // 👀
-      //   const counterShift3 = this.look(this.x, this.y, this.direction);
-      //   this.gCounter += this.genome[this.gCounter + counterShift3]; // увеличиваем на значение гена на значение через counterShift
-      //   this.energy--;
-      //   break;
+      case 31: // 👀
+        try {
+          const counterShift = this.look(this.x, this.y, this.direction);
+          this.gCounter += this.genome[this.gCounter + counterShift]; // увеличиваем на значение гена на значение через counterShift
+        } catch (e) {
+          console.log(`case 31 direction =${this.direction} e = ${e}`);
+        }
+        this.energy--;
+        break;
 
       // case 32:
 
@@ -310,8 +383,6 @@ class Organism {
 
       default:
         this.gCounter += this.genome[this.gCounter];
-        // здесь не нужен
-        if (this.gCounter > 63) this.gCounter = this.gCounter - 64;
         // если ген стал равен 0, здесь превращаем его в фотосинтез
         if (this.genome[this.gCounter] == 0) this.genome[this.gCounter] = 25;
         // console.log("default option " + this.gCounter + " id = " + this.id);
@@ -326,6 +397,10 @@ class Organism {
     // console.log("Организм продолжает жить");
 
     return false;
+  }
+
+  toText() {
+    return `id=${this.id} x=${this.x} y=${this.y} isDead=${this.isDead} genome=${this.genome} gCounter=${this.gCounter} E=${this.energy} minerals=${this.minerals} age=${this.numberofTurns}`;
   }
 }
 

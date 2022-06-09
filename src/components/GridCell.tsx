@@ -10,7 +10,8 @@ interface GridCell {
   organismId: number;
   isDead: boolean;
   color: Color;
-  onClick: React.MouseEventHandler<HTMLDivElement>;
+  immune: boolean;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 function GridCell({
@@ -23,6 +24,7 @@ function GridCell({
   organismId,
   energy,
   onClick,
+  immune,
 }: GridCell) {
   return (
     <div
@@ -30,11 +32,13 @@ function GridCell({
       style={{ background: color }}
       data-x={x}
       data-y={y}
-      data-id={id}
+      // data-id={id}
+      data-immune={immune ? "true" : "false"}
       data-organism-id={organismId}
       onClick={onClick}
     >
-      {energy != -1 && energy != undefined ? energy : ""}
+      {/* {energy != -1 && energy != undefined ? energy : ""} */}
+      {/* {organismId != -1 ? organismId : ""} */}
     </div>
   );
 }

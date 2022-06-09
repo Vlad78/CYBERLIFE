@@ -19,6 +19,7 @@ const initValues = (pair: [number, number], colonies = 4) => {
         isDead: false,
         color: Color.EMPTY,
         organismId: -1,
+        immune: false,
       });
     }
     initialValue.push(column);

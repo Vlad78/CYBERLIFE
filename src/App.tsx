@@ -2,9 +2,6 @@ import { Provider } from "react-redux";
 import "./App.scss";
 import { store } from "./app/store";
 import Playground from "./components/Playground";
-import initValues from "./functions/initialValueForPlayground";
-
-console.log("app");
 
 function App() {
   return (

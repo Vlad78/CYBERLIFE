@@ -1,9 +1,6 @@
 import Organism, { Genome } from "../components/Organism";
 
-export const coloniesInit = (
-  numColonies: number,
-  matrixSize: [number, number]
-) => {
+export const coloniesInit = (numColonies: number, matrixSize: [number, number]) => {
   const [x, y] = matrixSize;
 
   const a = (y - (y % 3)) / 3;
@@ -39,26 +36,19 @@ export const coloniesInit = (
 
   // prettier-ignore
   const seedGenotype3: Genome = [
-  25, 25, 26, 23, 25, 25, 25, 25, 
-  25, 25, 26, 23, 25, 25, 25, 25, 
-  25, 25, 25, 23, 25, 25, 25, 25, 
+  25, 25, 26, 23, 25, 25, 25, 29, 
+  25, 25, 26, 23, 25, 25, 25, 29, 
+  25, 25, 25, 23, 25, 25, 25, 29, 
   25, 25, 25, 24, 26, 25, 25, 25,
   25, 25, 25, 24, 26, 25, 25, 25,
   25, 25, 25, 24, 25, 26, 25, 25,
-  25, 25, 25, 24, 25, 26, 25, 25,
+  25, 25, 25, 24, 25, 26, 29, 29,
   25, 25, 25, 24, 25, 25, 25, 25
 ]
   // prettier-ignore-end
 
-  new Organism(c, a, seedGenotype3);
-  // new Organism(c, a - 1, seedGenotype3);
-  // new Organism(d, a, seedGenotype3);
-  // new Organism(c, b, seedGenotype3);
-  // new Organism(d, b, seedGenotype3);
-};
-
-// prettier-ignore
-const seedGenotype3 = [
+  // prettier-ignore
+  const seedGenotype4: Genome = [
   25, 25, 25, 25, 25, 25, 25, 25, 
   25, 25, 25, 25, 25, 25, 25, 25, 
   25, 25, 25, 25, 25, 25, 25, 25, 
@@ -68,4 +58,11 @@ const seedGenotype3 = [
   25, 25, 25, 25, 25, 25, 25, 25,
   25, 25, 25, 25, 25, 25, 25, 25
 ]
-// prettier-ignore-end
+  // prettier-ignore-end
+
+  new Organism(c, a, seedGenotype4);
+  // new Organism(c, a - 1, seedGenotype3);
+  // new Organism(d, a, seedGenotype3);
+  // new Organism(c, b, seedGenotype3);
+  // new Organism(d, b, seedGenotype3);
+};

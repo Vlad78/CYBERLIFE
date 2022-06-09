@@ -1,21 +1,43 @@
-import Organism from "../components/Organism";
+import GridCell from "../components/GridCell";
 import { deleteOrganism, getOrganismsArray } from "../state/organismsArray";
 import { setMatrixCellDead, setMatrixCell } from "../state/playgroundMatrix";
 
 const iteration = () => {
-  const organisms = getOrganismsArray();
+  //   console.log("==============================turn");
 
-  organisms.forEach((element, index) => {
-    const gridCell = element.exec(); // выполняем действие генов, возвращает параметры клетки матрицы
-    if (gridCell.isDead) {
-      // удаляем объект
-      //   console.log("удаляем объект");
-      setMatrixCellDead(gridCell);
-      deleteOrganism(gridCell.organismId!);
-    } else {
-      setMatrixCell(gridCell);
+  const organisms = getOrganismsArray();
+  const eatenCells: (number | null)[] = []; // сюда должны поступать айди убитых клеток
+
+  // TODO развернуть порядок итерации по массиву
+  //   organisms.forEach((element, index) => {
+  //     if (!eatenCells.includes(element.id)) {
+  //       const [gridCell, whoWasEaten] = element.exec(); // выполняем действие генов, возвращает параметры клетки матрицы, так же нужно вернуть айди съеденой клетки
+  //       // либо айди можно записывать в глобальный стейт
+  //       eatenCells.push(whoWasEaten);
+
+  //       if (gridCell.isDead) {
+  //         setMatrixCellDead(gridCell);
+  //         deleteOrganism(gridCell.organismId);
+  //       } else {
+  //         setMatrixCell(gridCell);
+  //       }
+  //     }
+  //   });
+
+  for (let i = organisms.length - 1; i >= 0; i--) {
+    if (!eatenCells.includes(organisms[i].id)) {
+      const [gridCell, whoWasEaten] = organisms[i].exec(); // выполняем действие генов, возвращает параметры клетки матрицы, так же нужно вернуть айди съеденой клетки
+      // либо айди можно записывать в глобальный стейт
+      eatenCells.push(whoWasEaten);
+
+      if (gridCell.isDead) {
+        setMatrixCellDead(gridCell);
+        deleteOrganism(gridCell.organismId);
+      } else {
+        setMatrixCell(gridCell);
+      }
     }
-  });
+  }
   return 1;
 };
 
@@ -26,3 +48,4 @@ export default iteration;
 // После выполнения генома организм записывает новые данные в ячейку матрицы Playground.
 // После выполнения генома организм резервирует клетку матрицы при необходимости.
 // Так же в будущем организм должен будет получить данные из матрицы об источнике энергии и о расположении соседних организмов.
+// Реализовать, чтобы организм не смог съесть молодой организм.

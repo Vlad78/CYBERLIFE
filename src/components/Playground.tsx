@@ -17,7 +17,7 @@ import OrganismData from "./OrganismData";
 let mutex = false;
 
 function Playground() {
-  let tsStart = new Date();
+  // let tsStart = new Date();
   // сделать инициацию через переменную в этом файле. Сначала underfined, потом true
   initialize();
   const initProps = getInitProps();
@@ -27,7 +27,7 @@ function Playground() {
     // iteration();
   }
 
-  const [update, setUpdate] = useState(true);
+  const [nTurns, setnTurns] = useState(0);
   const playground = getPGMatrix();
   const [orgamismOnScreen, setOrgamismOnScreen] = useState<
     [Organism | undefined | null, HTMLDivElement | undefined]
@@ -38,48 +38,57 @@ function Playground() {
   const run = () => {
     // tsStart = new Date();
     iteration();
-    setUpdate(!update);
+    setnTurns((pr) => pr + 1);
   };
 
   // выбор клетки для отображение подробной информации организма
 
   const selectCell = (e: React.MouseEvent<HTMLElement>) => {
     // устанавливаем в стейт новый организм
-    let element = e.target as HTMLDivElement;
+    const element = e.target as HTMLDivElement;
+    // console.log("SELECT============================================");
+    // console.log("element = ");
+    // console.log(element);
+
     let organism = getOrganism(element.getAttribute("data-organism-id"));
+    // console.log("organism = ");
+    // console.log(organism);
 
     // убираем стиль с предыдущей ячейки
     if (orgamismOnScreen[1] !== undefined) {
       orgamismOnScreen[1].classList.remove(style.isActive);
     }
+    // console.log("orgamismOnScreen[1] = ");
+    // console.log(orgamismOnScreen[1]);
 
     // меняем стиль выделенной ячейки
-    const el = e.target as HTMLDivElement;
-    if (el.getAttribute("data-organism-id") !== "-1")
-      el.classList.add(style.isActive);
+    // const el = e.target as HTMLDivElement;
+    if (element.getAttribute("data-organism-id") !== "-1")
+      element.classList.add(style.isActive);
 
     // записываем новое состояние
-    organism != null ? setOrgamismOnScreen([organism, el]) : "";
+    organism !== null ? setOrgamismOnScreen([organism, element]) : "";
+    // console.log("============================================");
   };
 
   const play = () => {
     mutex = true;
-    setUpdate(!update);
+    setnTurns((pr) => pr + 1);
   };
   const stop_ = () => (mutex = false);
   useEffect(() => {
     if (mutex) {
       var refreshId = setInterval(() => {
         iteration();
-        const time = new Date().getTime() - tsStart.getTime();
-        console.log("Iteration time ms: " + time);
-        setUpdate(!update);
+        // const time = new Date().getTime() - tsStart.getTime();
+        // console.log("Iteration time ms: " + time);
+        setnTurns((pr) => pr + 1);
       }, initProps.speed);
       return () => {
         clearInterval(refreshId);
       };
     }
-  }, [update]);
+  }, [nTurns]);
 
   const gridSize = {
     gridTemplate: `repeat(${initProps.matrixSize[1]}, max(11px)) / repeat(${initProps.matrixSize[0]}, max(11px))`,
@@ -96,6 +105,9 @@ function Playground() {
       <button onClick={run}>Next turn</button>
       <button onClick={play}>Play</button>
       <button onClick={stop_}>Stop</button>
+      <div style={{ display: "inline-block" }}>
+        {"  "}Number of turns: {nTurns}
+      </div>
       <div className={style.body}>
         <div className={style.playground} style={gridSize}>
           <Matrix playground={playground} selectCell={selectCell} />

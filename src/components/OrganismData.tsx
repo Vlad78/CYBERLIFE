@@ -9,6 +9,9 @@ const OrganismData = ({ organism }: { organism: Organism }) => {
       <div>energy: {organism.energy}</div>
       <div>dead: {organism.isDead ? "Yes" : "No"}</div>
       <div>minerals: {organism.minerals}</div>
+      <div>gCounter: {organism.gCounter}</div>
+      <div>age: {organism.numberofTurns}</div>
+      <div>immune: {organism.immune ? "true" : "false"}</div>
     </>
   );
 };

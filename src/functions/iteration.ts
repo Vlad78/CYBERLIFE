@@ -8,22 +8,6 @@ const iteration = () => {
   const organisms = getOrganismsArray();
   const eatenCells: (number | null)[] = []; // сюда должны поступать айди убитых клеток
 
-  // TODO развернуть порядок итерации по массиву
-  //   organisms.forEach((element, index) => {
-  //     if (!eatenCells.includes(element.id)) {
-  //       const [gridCell, whoWasEaten] = element.exec(); // выполняем действие генов, возвращает параметры клетки матрицы, так же нужно вернуть айди съеденой клетки
-  //       // либо айди можно записывать в глобальный стейт
-  //       eatenCells.push(whoWasEaten);
-
-  //       if (gridCell.isDead) {
-  //         setMatrixCellDead(gridCell);
-  //         deleteOrganism(gridCell.organismId);
-  //       } else {
-  //         setMatrixCell(gridCell);
-  //       }
-  //     }
-  //   });
-
   for (let i = organisms.length - 1; i >= 0; i--) {
     if (!eatenCells.includes(organisms[i].id)) {
       const [gridCell, whoWasEaten] = organisms[i].exec(); // выполняем действие генов, возвращает параметры клетки матрицы, так же нужно вернуть айди съеденой клетки

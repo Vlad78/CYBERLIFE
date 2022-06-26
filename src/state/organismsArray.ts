@@ -49,8 +49,8 @@ export const getOrganism = (id: number | string | null) => {
     }
   }
 
-  // throw new Error(
-  //   `Организм ${id} не был найден в массиве, возможно, организм уже умер. id=${id}, typeof id=${typeof id}`
-  // );
+  throw new Error(
+    `Организм ${id} не был найден в массиве, возможно, организм уже умер. id=${id}, typeof id=${typeof id}`
+  );
   return null;
 };

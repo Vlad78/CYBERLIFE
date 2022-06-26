@@ -14,26 +14,15 @@ interface GridCell {
   onClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
-function GridCell({
-  x,
-  y,
-  isEmpty,
-  isDead,
-  id,
-  color,
-  organismId,
-  energy,
-  onClick,
-  immune,
-}: GridCell) {
+function GridCell({ x, y, isEmpty, isDead, id, color, organismId, energy, onClick }: GridCell) {
   return (
     <div
       className={style.background_default}
       style={{ background: color }}
-      data-x={x}
-      data-y={y}
+      // data-x={x}
+      // data-y={y}
       // data-id={id}
-      data-immune={immune ? "true" : "false"}
+      // data-immune={immune ? "true" : "false"}
       data-organism-id={organismId}
       onClick={onClick}
     >

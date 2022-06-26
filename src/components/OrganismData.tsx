@@ -11,7 +11,8 @@ const OrganismData = ({ organism }: { organism: Organism }) => {
       <div>minerals: {organism.minerals}</div>
       <div>gCounter: {organism.gCounter}</div>
       <div>age: {organism.numberofTurns}</div>
-      <div>immune: {organism.immune ? "true" : "false"}</div>
+      <div>color: {`${organism.colorCode.r} ${organism.colorCode.g} ${organism.colorCode.b}`}</div>
+      {/* <div>immune: {organism.immune ? "true" : "false"}</div> */}
     </>
   );
 };

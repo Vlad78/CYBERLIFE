@@ -3,13 +3,13 @@ import initValues from "../functions/initialValueForPlayground";
 import { initiatePlaygroundMatrix } from "./playgroundMatrix";
 
 const initialProperties = {
-  speed: 100, // Скорость обновления площадки. Начальное - 2 сек/день
+  speed: 1, // Скорость обновления площадки. Начальное - 2 сек/день
   colonies: 1, // Количество колоний в начале. По-умолчанию 4
-  radiation: 15, // Энергия солнца
+  radiation: 18, // Энергия солнца
   minerals: 15, // Количество минералов
   numberOfCommand: 6, // Максимальное кол-во команд генома
-  matrixSize: [69, 40] as [number, number], // размер матрицы
-  initialPlayground: initValues([69, 40]),
+  matrixSize: [105, 60] as [number, number], // размер матрицы
+  initialPlayground: initValues([105, 60]),
   firstRun: true,
   init: false,
 };
@@ -24,10 +24,7 @@ export function getInitProps() {
 
 export function endInitializing() {
   initialProperties.firstRun = false;
-  initiatePlaygroundMatrix(
-    initialProperties.initialPlayground,
-    initialProperties.matrixSize
-  );
+  initiatePlaygroundMatrix(initialProperties.initialPlayground, initialProperties.matrixSize);
 }
 
 export default initialProperties;

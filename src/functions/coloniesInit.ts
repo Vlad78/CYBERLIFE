@@ -57,10 +57,11 @@ export const coloniesInit = (numColonies: number, matrixSize: [number, number]) 
   25, 25, 25, 25, 25, 25, 25, 25,
   25, 25, 25, 25, 25, 25, 25, 25,
   25, 25, 25, 25, 25, 25, 25, 25
-]
+  ]
+  let colorCode = { r: 0, g: 100, b: 0 };
   // prettier-ignore-end
 
-  new Organism(c, a, seedGenotype4);
+  new Organism(c, a, seedGenotype4, colorCode);
   // new Organism(c, a - 1, seedGenotype3);
   // new Organism(d, a, seedGenotype3);
   // new Organism(c, b, seedGenotype3);

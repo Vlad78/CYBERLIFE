@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { coloniesInit } from "../functions/coloniesInit";
 import iteration from "../functions/iteration";
-import {
-  endInitializing,
-  getInitProps,
-  initialize,
-} from "../state/initialProperties";
+import { endInitializing, getInitProps, initialize } from "../state/initialProperties";
 import style from "./Playground.module.scss";
 import { getLightEnergy, getPGMatrix } from "../state/playgroundMatrix";
 import { getOrganism } from "../state/organismsArray";
@@ -15,34 +11,48 @@ import Matrix from "./Matrix";
 import OrganismData from "./OrganismData";
 
 let mutex = false;
+// TODO
+// TODO github and deploy
+// TODO genome functions
+// TODO instructions (use router)
+// TODO input interface (use forms) + dynamic input
+// TODO mark used genes
+// TODO styles (research approaches)
+// TODO save/load/export/import state
+// TODO render speed optimisation
+// TODO animation of moving
 
 function Playground() {
-  // let tsStart = new Date();
+  let tsStart = new Date();
+  let tsEnd = new Date();
   // сделать инициацию через переменную в этом файле. Сначала underfined, потом true
   initialize();
   const initProps = getInitProps();
   if (initProps.firstRun) {
     coloniesInit(initProps.colonies, initProps.matrixSize);
     endInitializing();
-    // iteration();
+    iteration();
   }
 
-  const [nTurns, setnTurns] = useState(0);
+  const [nTurns, setnTurns] = useState({ turns: 0, time: new Date().getTime(), deltaTime: 0 });
   const playground = getPGMatrix();
   const [orgamismOnScreen, setOrgamismOnScreen] = useState<
     [Organism | undefined | null, HTMLDivElement | undefined]
-  >([getOrganism(0), undefined]);
+  >([null, undefined]);
 
   // стейт тикающий со скоростью обновления
   // ручное упавление
-  const run = () => {
-    // tsStart = new Date();
+  const aTurn = () => {
+    tsStart = new Date();
     iteration();
-    setnTurns((pr) => pr + 1);
+    tsEnd = new Date();
+    setnTurns((pr) => {
+      const currentT = new Date().getTime();
+      return { time: currentT, turns: pr.turns + 1, deltaTime: currentT - pr.time };
+    });
   };
 
   // выбор клетки для отображение подробной информации организма
-
   const selectCell = (e: React.MouseEvent<HTMLElement>) => {
     // устанавливаем в стейт новый организм
     const element = e.target as HTMLDivElement;
@@ -63,8 +73,7 @@ function Playground() {
 
     // меняем стиль выделенной ячейки
     // const el = e.target as HTMLDivElement;
-    if (element.getAttribute("data-organism-id") !== "-1")
-      element.classList.add(style.isActive);
+    if (element.getAttribute("data-organism-id") !== "-1") element.classList.add(style.isActive);
 
     // записываем новое состояние
     organism !== null ? setOrgamismOnScreen([organism, element]) : "";
@@ -73,16 +82,22 @@ function Playground() {
 
   const play = () => {
     mutex = true;
-    setnTurns((pr) => pr + 1);
+    setnTurns((pr) => {
+      const currentT = new Date().getTime();
+      return { time: currentT, turns: pr.turns + 1, deltaTime: currentT - pr.time };
+    });
   };
   const stop_ = () => (mutex = false);
   useEffect(() => {
     if (mutex) {
       var refreshId = setInterval(() => {
+        tsStart = new Date();
         iteration();
-        // const time = new Date().getTime() - tsStart.getTime();
-        // console.log("Iteration time ms: " + time);
-        setnTurns((pr) => pr + 1);
+        tsEnd = new Date();
+        setnTurns((pr) => {
+          const currentT = new Date().getTime();
+          return { time: currentT, turns: pr.turns + 1, deltaTime: currentT - pr.time };
+        });
       }, initProps.speed);
       return () => {
         clearInterval(refreshId);
@@ -97,16 +112,20 @@ function Playground() {
     gridAutoFlow: "column",
   };
 
-  // нужно задать частоту рендера независимо от скорости чтения генома и операций
   // нужно сделать тест на проверку целостности матрицы
   return (
     <>
-      {/* {console.log("render")} */}
-      <button onClick={run}>Next turn</button>
+      <button onClick={aTurn}>Next turn</button>
       <button onClick={play}>Play</button>
       <button onClick={stop_}>Stop</button>
       <div style={{ display: "inline-block" }}>
-        {"  "}Number of turns: {nTurns}
+        {"  "}Number of turns: {nTurns.turns}
+      </div>
+      <div style={{ display: "inline-block" }}>
+        {"  "}Time to render: {nTurns.deltaTime}
+      </div>
+      <div style={{ display: "inline-block" }}>
+        {"  "}Time of calculation: {tsEnd!.getTime() - tsStart.getTime() + " ms"}
       </div>
       <div className={style.body}>
         <div className={style.playground} style={gridSize}>
@@ -114,24 +133,15 @@ function Playground() {
         </div>
 
         <div className={style.gene}>
-          {orgamismOnScreen[0] != null ? (
-            <OrganismGenes organism={orgamismOnScreen[0]} />
-          ) : (
-            ""
-          )}
+          {orgamismOnScreen[0] != null ? <OrganismGenes organism={orgamismOnScreen[0]} /> : ""}
         </div>
 
         <div className={style.data}>
-          {orgamismOnScreen[0] != null ? (
-            <OrganismData organism={orgamismOnScreen[0]} />
-          ) : (
-            ""
-          )}
+          {orgamismOnScreen[0] != null ? <OrganismData organism={orgamismOnScreen[0]} /> : ""}
         </div>
       </div>
       {/* {console.log(
-        "--------------------- Iteration time ms: " +
-          (new Date().getTime() - tsStart.getTime())
+        "--------------------- Iteration time ms: " + (new Date().getTime() - tsStart.getTime())
       )} */}
     </>
   );

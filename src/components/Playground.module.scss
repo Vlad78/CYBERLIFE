@@ -1,0 +1,49 @@
+.body {
+  display: grid;
+  grid-template-areas:
+    "pl pl pl pl gene"
+    "pl pl pl pl gene"
+    "pl pl pl pl data"
+    "pl pl pl pl .";
+
+  .playground {
+    grid-area: pl;
+    margin: 15px 15px;
+    padding: 2px;
+    display: grid;
+    grid-template: repeat(10, max(11px)) / repeat(10, max(11px));
+    width: 1100px;
+    height: 638px;
+    background: rgb(240, 240, 240);
+  }
+
+  .gene {
+    grid-area: gene;
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);
+    grid-template-columns: repeat(8, 1fr);
+    width: 190px;
+    height: 190px;
+    margin: 15px 15px;
+    background: rgb(237, 237, 237);
+    text-align: center;
+
+    &__gridElement {
+      background: rgb(255, 186, 186);
+      margin: 1px;
+    }
+  }
+
+  .data {
+    grid-area: data;
+    margin: 15px 15px;
+    padding: 15px;
+    background: rgb(237, 237, 237);
+    width: 190px;
+    min-height: 20px;
+  }
+}
+
+.isActive {
+  border: 1px solid darkblue;
+}

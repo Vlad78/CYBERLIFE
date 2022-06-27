@@ -1,0 +1,28 @@
+enum Color {
+  EMPTY = '#FFFCF9',
+  DEAD = '#b7b7b7',
+  IMMUNE = '#ffcb00',
+  BBBBB = '#00dcf0',
+  BBBBG = '#00dcd2',
+  BBBGG = '#37dcb9',
+  BBGGG = '#50dcaa',
+  BGGGG = '#64dc8c',
+  GGGGG = '#78dc50',
+  GGGGR = '#91c850',
+  GGGRR = '#b4b450',
+  GGRRR = '#cd9150',
+  GRRRR = '#e66e50',
+  RRRRR = '#ff5050',
+  BBBBR = '#95c0e8',
+  BBBRR = '#e3a8d5',
+  BBRRR = '#ff9db2',
+  BRRRR = '#ff758a',
+  BBBGR = '#c1c4d3',
+  BBGRR = '#939dc5',
+  BGRRR = '#b495a6',
+  BBGGR = '#a7ccc4',
+  BGGRR = '#c7c5ae',
+  BGGGR = '#84d5aa',
+}
+
+export default Color

@@ -11,7 +11,7 @@
     "lint:write": "eslint --debug src/ --fix",
     "prettier": "prettier --write src/**/*.tsx",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.1",

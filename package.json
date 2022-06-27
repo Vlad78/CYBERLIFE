@@ -40,5 +40,10 @@
     "pretty-quick": "^3.1.3",
     "typescript": "^4.6.3",
     "vite": "^2.9.9"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "ng lint"
+    }
   }
 }
